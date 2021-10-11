@@ -8,16 +8,30 @@ from tqdm import tqdm
 ################## output should have a linear act function 
 
 #################### load in data 
-df=pd.read_csv('pricing_final.csv')
-df.columns
-df.info()
+df1=pd.read_csv('pricing_final.csv')
+df1.columns
+df1.info()
+
+
+
+######################################################################## convert all to floats 
+
+
+
+
+
+test=df1.iloc[df1.index[df1.index.isin(np.random.choice(df1.index,size=int(round(len(df1)*.2))))]]
+df=df1.iloc[df1.index[~df1.index.isin(np.random.choice(df1.index,size=int(round(len(df1)*.2))))]]
+df.head()
+
 X=df.drop('quantity',axis=1) 
 y_data=df['quantity']
 #i think order is a quantative var 
 len(np.unique(df['sku'])) #74999
-len(np.unique(df['category'])) #32 
+len(np.unique(df['category'])) #32
 
-df.head()
+len(X) 
+len(y_data)
 ##### tune through different optimizers 
 #1.number nodes 
 #2.number of hidden layers 
@@ -34,29 +48,33 @@ def expandgrid(*itrs):
    product = list(itertools.product(*itrs))
    return {'Var{}'.format(i+1):[x[i] for x in product] for i in range(len(itrs))}
 #need to figure out how to tune the number of layers 
-numberNodes1=np.arange(1,3,1)
-numberNodes2=np.arange(1,3,1)
+numberNodes1=np.arange(3,5,1)
+numberNodes2=np.arange(2,4,1)
 numberNodes3=np.arange(1,3,1)
-actFuns1=['elu','sigmoid'] 
-actFuns2=['elu','sigmoid'] 
-actFuns3=['elu','sigmoid'] 
-lr=np.arange(0.0001,0.0002,0.0001)
+
+actFuns1=['elu','sigmoid','relu'] 
+actFuns2=['elu','sigmoid','relu'] 
+actFuns3=['elu','sigmoid','relu']  
+lr=np.arange(0.0001,0.0003,0.0001)
+
+#####parameters for optimizers if use adam then just comment these out 
 #change different optimizers 
-momment=[0,0.9]
+momment=[0,0.9] # take these out and use adam  
 nv=[True,False]
 
 params=pd.DataFrame(expandgrid(numberNodes1,numberNodes2,numberNodes3,actFuns1,actFuns2,actFuns3,lr,momment,nv))
-params.info()
+len(params)
 #make a col in params to store the loss 
 params['loss']=0.0 
 
 #params['loss'].iloc[0]=model.evaluate(valX,valY)
-params
-folds=np.arange(0,1.25,.25)
+params.head()
+folds=np.arange(0,1,.5) #this is done by 1 fold cv 
+folds
 
 for i in tqdm(range(len(params))):
     lossParam_i=[]
-    for j in tqdm(range(0,len(folds)-1)):
+    for j in range(0,len(folds)-1):
         #this line is doing this.... 
         buildX=X.iloc[~X.index.isin(range(int(round(len(X.index)*folds[j])),int(round(len(X.index)*folds[j+1]))))] 
         #this line is doing this.... 
@@ -140,6 +158,9 @@ for i in tqdm(range(len(params))):
       
         model.compile(loss = 'mse', optimizer = tf.keras.optimizers.SGD(learning_rate = params['Var7'].iloc[i], momentum=
             np.array(params['Var8'].iloc[i]), nesterov=bool(params['Var9'].iloc[i])))
+        
+        # model.compile(loss = 'mse', optimizer = tf.keras.optimizers.Adam(
+        #     learning_rate=params['Var7'].iloc[i], beta_1=0.9, beta_2=0.999, epsilon=1e-07))
 
         #Fit model
         model.fit(x=[x_cat_1,x_cat_2,x_cat_3,x_num_4,x_num_5],y=y, batch_size=200, epochs=10)
@@ -148,7 +169,7 @@ for i in tqdm(range(len(params))):
     params['loss'].iloc[i]=np.mean(lossParam_i)
 
 ####### make sure to keep all of the results from training and save as a df in the folder 
-params.to_csv('paramsForModel3layers.csv')
+params.to_csv('paramsForModel3_MoreActFunslayers.csv')
 params.head()
 
 
@@ -157,12 +178,3 @@ params.head()
 params[params['loss']==params['loss'].min()]
 
 ### keep track of the loss for each number of hidden layers 
-
-model.compile(loss = 'mse', optimizer = tf.keras.optimizers.SGD(learning_rate = params['Var7'].iloc[i], momentum=
-        np.array(params['Var8'].iloc[i]), nesterov=bool(params['Var9'].iloc[i])))
-
-
-#Fit model
-model.fit(x=[x_cat_1,x_cat_2,x_cat_3,x_num_4,x_num_5],y=y, batch_size=200, epochs=10)
-
-params.head()
