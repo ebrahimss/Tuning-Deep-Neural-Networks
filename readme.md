@@ -1,6 +1,3 @@
-# Writing the README.md content for the Tuning Deep Neural Networks repository to a file
-
-readme_content_tuning_dnn = """
 # Tuning Deep Neural Networks
 
 ## Overview
