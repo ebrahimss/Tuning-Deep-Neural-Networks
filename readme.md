@@ -3,6 +3,7 @@
 ## Overview
 
 This repository is dedicated to providing resources and tools for effectively tuning deep neural networks. It encompasses a range of techniques aimed at optimizing the performance of neural models in various domains.
+For a quick review of the project, check [this](https://liveutk-my.sharepoint.com/:p:/r/personal/ssharifn_vols_utk_edu/Documents/Sharing_Media(s)/Deep%20Learning%20Tunning_for-repo.pptx?d=w8b00a423159f486196dc7f02445f1e66&csf=1&web=1&e=6zeIZY).
 
 ## Features
 
